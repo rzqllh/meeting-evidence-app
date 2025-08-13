@@ -5,9 +5,9 @@
  *
  *    Description:  Dynamic page for displaying a single event's details and photo gallery.
  *
- *        Version:  1.0
+ *        Version:  1.1
  *        Created:  [Current Date]
- *       Revision:  none
+ *       Revision:  Added a contextual "Upload to this Event" button.
  *
  *         Author:  Your Technical Assistant
  *
@@ -41,13 +41,13 @@ export default async function EventDetailsPage({ params }) {
     .single();
 
   if (eventError || !event) {
-    notFound(); // Renders the not-found.js file or a default 404 page
+    notFound();
   }
 
   // 3. Fetch Photos for this Event (with uploader's name)
   const { data: photos, error: photosError } = await supabase
     .from('evidence_photos')
-    .select('*, users(name, email)') // Join with users table
+    .select('*, users(name, email)')
     .eq('event_id', eventId)
     .order('created_at', { ascending: true });
 
@@ -66,14 +66,25 @@ export default async function EventDetailsPage({ params }) {
       <Header user={user} />
       <main className="w-full max-w-6xl p-4 md:p-8">
         <div className="mb-8">
-          <Link href="/" className="text-sm text-indigo-600 hover:underline">
-            &larr; Back to Dashboard
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mt-2">{event.name}</h1>
-          <p className="text-md text-gray-600">{event.description}</p>
-          <p className="text-sm text-gray-500 mt-1">
-            Date: {new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <Link href="/" className="text-sm text-indigo-600 hover:underline">
+                &larr; Back to Dashboard
+              </Link>
+              <h1 className="text-3xl font-bold text-gray-900 mt-2">{event.name}</h1>
+              <p className="text-md text-gray-600">{event.description}</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Date: {new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
+            </div>
+            {/* CONTEXTUAL UPLOAD BUTTON */}
+            <Link
+              href={`/upload?eventId=${event.id}`}
+              className="px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap"
+            >
+              ➕ Upload to this Event
+            </Link>
+          </div>
         </div>
 
         <PhotoGallery groupedPhotos={groupedPhotos} />
